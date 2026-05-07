@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turnos Asignados — Humand</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --text-default: #303036; --text-lighter: #636271; --brand: #6f93eb;
+    --blue-100: #eff2ff; --blue-800: #213478; --bg-layout: #f5f6f8;
+    --white: #ffffff; --border: #e2e4ea;
+    --shadow-card: -1px 4px 8px 0px rgba(233,233,244,1);
+    --shadow-hover: -1px 8px 16px 0px rgba(170,170,186,0.45);
+  }
+  body { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.4; letter-spacing: 0.2px; color: var(--text-default); background: var(--bg-layout); min-height: 100vh; padding: 24px; }
+  .header { background: var(--white); border-radius: 16px; box-shadow: var(--shadow-card); padding: 20px 28px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+  .logo-box { width: 40px; height: 40px; background: var(--blue-800); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--blue-800); }
+  .header p { font-size: 12px; color: var(--text-lighter); margin-top: 2px; }
+  .card { background: var(--white); border-radius: 16px; box-shadow: var(--shadow-card); padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 15px; font-weight: 600; color: var(--blue-800); margin-bottom: 16px; }
+  .filters-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--text-lighter); text-transform: uppercase; letter-spacing: 0.5px; }
+  .field input, .field select { height: 40px; border: 1.5px solid var(--border); border-radius: 8px; padding: 0 12px; font-family: 'Roboto', sans-serif; font-size: 14px; color: var(--text-default); background: var(--bg-layout); outline: none; transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { border-color: var(--brand); background: var(--white); }
+  .btn { height: 40px; padding: 0 20px; border: none; border-radius: 8px; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, opacity 0.15s; white-space: nowrap; }
+  .btn:hover { box-shadow: var(--shadow-hover); }
+  .btn:active { opacity: 0.85; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .btn-primary { background: var(--blue-800); color: white; }
+  .btn-excel { background: #1d6f42; color: white; }
+  .results-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .count { font-size: 14px; color: var(--text-lighter); }
+  .count strong { color: var(--text-default); font-weight: 600; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--blue-100); }
+  thead th { padding: 12px 16px; text-align: left; font-weight: 600; font-size: 12px; color: var(--blue-800); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--blue-100); }
+  tbody td { padding: 10px 16px; white-space: nowrap; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--blue-100); color: var(--blue-800); }
+  .lighter { color: var(--text-lighter); font-size: 13px; }
+  .state { padding: 48px 24px; text-align: center; color: var(--text-lighter); }
+  .state p { font-size: 16px; margin-bottom: 4px; }
+  .state small { font-size: 13px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 599px) { body { padding: 16px; } .filters-row { flex-direction: column; } .field { min-width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-box">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="18" rx="3" stroke="white" stroke-width="1.8"/>
+      <line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.8"/>
+      <line x1="8" y1="2" x2="8" y2="6" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="16" y1="2" x2="16" y2="6" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Turnos Asignados</h1>
+    <p>Humand · Instancia 154194</p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Filtros</h2>
+  <div class="filters-row">
+    <div class="field">
+      <label>Fecha desde</label>
+      <input type="date" id="fecha_desde">
+    </div>
+    <div class="field">
+      <label>Fecha hasta</label>
+      <input type="date" id="fecha_hasta">
+    </div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="usuario" placeholder="Buscar por nombre…">
+    </div>
+    <div class="field">
+      <label>Jefe directo</label>
+      <select id="jefe"><option value="">Todos</option></select>
+    </div>
+    <div class="field">
+      <label>Sucursal</label>
+      <select id="sucursal"><option value="">Todas</option></select>
+    </div>
+    <button class="btn btn-primary" id="btnBuscar" onclick="buscar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Consultar
+    </button>
+    <button class="btn btn-excel" id="btnExcel" onclick="descargarExcel()" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar Excel
+    </button>
+  </div>
+</div>
+
+<div id="resultsBar" class="results-bar" style="display:none">
+  <span class="count" id="countLabel"></span>
+</div>
+
+<div class="card" id="tableCard">
+  <div class="state" id="stateInitial">
+    <p>Seleccioná un rango de fechas</p>
+    <small>y hacé clic en Consultar para ver los turnos</small>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const QUERY_ID = 39389;
+// Se reemplaza en runtime por la URL del proxy de Vercel
+const PROXY = '/api/redash';
+
+let allData = [];
+
+// Semana actual por defecto
+const today = new Date();
+const dow = today.getDay();
+const lunes = new Date(today); lunes.setDate(today.getDate() - ((dow + 6) % 7));
+const domingo = new Date(lunes); domingo.setDate(lunes.getDate() + 6);
+const fmt = d => d.toISOString().split('T')[0];
+document.getElementById('fecha_desde').value = fmt(lunes);
+document.getElementById('fecha_hasta').value = fmt(domingo);
+
+// Cargar filtros dinámicos al iniciar
+async function cargarFiltros() {
+  try {
+    // Traemos resultados de la última semana para poblar jefes y sucursales
+    const desde = fmt(lunes); const hasta = fmt(domingo);
+    const res = await fetch(`${PROXY}?endpoint=queries/${QUERY_ID}/results.json&p_fecha_desde=${desde}&p_fecha_hasta=${hasta}&p_usuario=`);
+    const data = await res.json();
+    const rows = data?.query_result?.data?.rows || [];
+
+    const jefes = [...new Set(rows.map(r => r['Jefe::multi-filter']).filter(Boolean))].sort();
+    const sucursales = [...new Set(rows.map(r => r['Sucursal::multi-filter']).filter(Boolean))].sort();
+
+    const selJefe = document.getElementById('jefe');
+    jefes.forEach(j => { const o = document.createElement('option'); o.value = j; o.textContent = j; selJefe.appendChild(o); });
+
+    const selSuc = document.getElementById('sucursal');
+    sucursales.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; selSuc.appendChild(o); });
+  } catch(e) {
+    console.warn('No se pudieron cargar filtros dinámicos', e);
+  }
+}
+
+async function buscar() {
+  const desde   = document.getElementById('fecha_desde').value;
+  const hasta   = document.getElementById('fecha_hasta').value;
+  const usuario = document.getElementById('usuario').value.trim();
+
+  if (!desde || !hasta) { alert('Seleccioná fecha desde y hasta.'); return; }
+
+  setLoading(true);
+  try {
+    const params = new URLSearchParams({ endpoint: `queries/${QUERY_ID}/results.json`, p_fecha_desde: desde, p_fecha_hasta: hasta, p_usuario: usuario });
+    const res = await fetch(`${PROXY}?${params}`);
+    const data = await res.json();
+    allData = data?.query_result?.data?.rows || [];
+
+    // Actualizar dropdowns con nuevos datos
+    actualizarDropdowns(allData);
+    renderTable(allData);
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function actualizarDropdowns(rows) {
+  const jefeActual = document.getElementById('jefe').value;
+  const sucActual  = document.getElementById('sucursal').value;
+
+  const jefes = [...new Set(rows.map(r => r['Jefe::multi-filter']).filter(Boolean))].sort();
+  const sucs  = [...new Set(rows.map(r => r['Sucursal::multi-filter']).filter(Boolean))].sort();
+
+  const selJ = document.getElementById('jefe');
+  selJ.innerHTML = '<option value="">Todos</option>';
+  jefes.forEach(j => { const o = document.createElement('option'); o.value = j; o.textContent = j; if (j === jefeActual) o.selected = true; selJ.appendChild(o); });
+
+  const selS = document.getElementById('sucursal');
+  selS.innerHTML = '<option value="">Todas</option>';
+  sucs.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; if (s === sucActual) o.selected = true; selS.appendChild(o); });
+}
+
+function filtrarDatos() {
+  const jefe = document.getElementById('jefe').value;
+  const suc  = document.getElementById('sucursal').value;
+  return allData.filter(r => {
+    if (jefe && r['Jefe::multi-filter'] !== jefe) return false;
+    if (suc  && r['Sucursal::multi-filter'] !== suc)  return false;
+    return true;
+  });
+}
+
+function renderTable(rawRows) {
+  const rows = filtrarDatos();
+  const card = document.getElementById('tableCard');
+  const rb   = document.getElementById('resultsBar');
+
+  document.getElementById('countLabel').innerHTML = `<strong>${rows.length}</strong> registro${rows.length !== 1 ? 's' : ''} encontrado${rows.length !== 1 ? 's' : ''}`;
+  rb.style.display = 'flex';
+
+  if (rows.length === 0) {
+    card.innerHTML = `<div class="state"><p>Sin resultados</p><small>No hay turnos para los filtros seleccionados</small></div>`;
+    document.getElementById('btnExcel').disabled = true;
+    return;
+  }
+
+  const cols = [
+    { key: 'Usuario', label: 'Usuario' },
+    { key: 'Email', label: 'Email' },
+    { key: 'Clave Usuario', label: 'Clave' },
+    { key: 'Jefe::multi-filter', label: 'Jefe' },
+    { key: 'Sucursal::multi-filter', label: 'Sucursal' },
+    { key: 'Fecha', label: 'Fecha' },
+    { key: 'Día', label: 'Día' },
+    { key: 'Turno', label: 'Turno' },
+    { key: 'Hora entrada', label: 'Entrada' },
+    { key: 'Hora salida', label: 'Salida' },
+  ];
+
+  const thead = `<thead><tr>${cols.map(c => `<th>${c.label}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${rows.map(r => `<tr>${cols.map(c => {
+    const v = r[c.key] ?? '—';
+    if (c.key === 'Sucursal::multi-filter') return `<td><span class="badge">${v}</span></td>`;
+    if (c.key === 'Email' || c.key === 'Clave Usuario') return `<td class="lighter">${v}</td>`;
+    return `<td>${v}</td>`;
+  }).join('')}</tr>`).join('')}</tbody>`;
+
+  card.innerHTML = `<div class="table-wrap"><table>${thead}${tbody}</table></div>`;
+  document.getElementById('btnExcel').disabled = false;
+}
+
+function descargarExcel() {
+  const rows = filtrarDatos();
+  if (!rows.length) return;
+  const cols = { 'Usuario':'Usuario','Email':'Email','Clave Usuario':'Clave','Jefe::multi-filter':'Jefe','Sucursal::multi-filter':'Sucursal','Fecha':'Fecha','Día':'Día','Turno':'Turno','Hora entrada':'Hora entrada','Hora salida':'Hora salida' };
+  const wsData = [Object.values(cols), ...rows.map(r => Object.keys(cols).map(k => r[k] ?? ''))];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [22,28,12,22,20,12,10,16,10,10].map(w => ({ wch: w }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Turnos');
+  const desde = document.getElementById('fecha_desde').value;
+  const hasta = document.getElementById('fecha_hasta').value;
+  XLSX.writeFile(wb, `turnos_${desde}_${hasta}.xlsx`);
+}
+
+function setLoading(on) {
+  document.getElementById('btnBuscar').disabled = on;
+  document.getElementById('btnExcel').disabled = true;
+  if (on) {
+    document.getElementById('resultsBar').style.display = 'none';
+    document.getElementById('tableCard').innerHTML = `<div class="state"><div class="spinner"></div><p>Consultando turnos…</p><small>Esto puede tomar unos segundos</small></div>`;
+  }
+}
+
+function showError(msg) {
+  document.getElementById('tableCard').innerHTML = `<div class="state"><p style="color:#e53e3e">Error al consultar</p><small>${msg}</small></div>`;
+}
+
+// Filtros client-side al cambiar dropdown
+document.getElementById('jefe').addEventListener('change', () => { if (allData.length) renderTable(allData); });
+document.getElementById('sucursal').addEventListener('change', () => { if (allData.length) renderTable(allData); });
+
+cargarFiltros();
+</script>
+</body>
+</html>
